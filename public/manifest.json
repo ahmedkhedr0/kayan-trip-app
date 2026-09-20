@@ -1,0 +1,28 @@
+{
+  "id": "/",
+  "name": "KAYAN | رحلة العين السخنة الرسمية",
+  "short_name": "KAYAN Sokhna",
+  "description": "الموقع والتطبيق الرسمي لرحلة كيان إلى العين السخنة (شاطئ ونادي الجوهرة) - جداول الرحلة، الحافلات، والمقاعد وتحديثات البث المباشر.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#081120",
+  "background_color": "#081120",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

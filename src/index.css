@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    font-family: 'Alexandria', 'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.015em;
+    background-color: #081120;
+    color: #f1f5f9;
+  }
+  .font-english {
+    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  }
+  .font-tech {
+    font-family: 'Space Grotesk', 'Outfit', monospace;
+  }
+  h1, h2, h3, h4, .font-heading {
+    font-family: 'Alexandria', 'Outfit', sans-serif;
+  }
+}
+
+/* Gentle coastal ambient pulse - calm, eye-friendly */
+@keyframes softOceanGlow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scale(1.03);
+  }
+}
+
+.ambient-coastal-glow {
+  animation: softOceanGlow 6s ease-in-out infinite;
+}
+
+/* Custom modern scrollbar - gentle and refined */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #081120;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #0284c7;
+}
