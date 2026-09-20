@@ -297,14 +297,14 @@ useEffect(() => {
 
       {/* Admin Management Modal */}
       <AdminModal
-    isOpen={isAdminOpen}
-    onClose={() => setIsAdminOpen(false)}
-    tripData={tripData}
-    onSave={(newData) => {
-      setTripData(newData);
-      saveTripDataToCloud(newData).catch(() => {});
-    }}
-  />
+        isOpen={isAdminModalOpen}
+        onClose={() => setIsAdminModalOpen(false)}
+        tripData={tripData}
+        onSave={handleSaveTripData}
+        onResetToDefault={handleResetToDefault}
+        isAdminLoggedIn={isAdminLoggedIn}
+        setIsAdminLoggedIn={setIsAdminLoggedIn}
+      />
 
       {/* Footer */}
       <Footer
