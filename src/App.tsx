@@ -17,7 +17,7 @@ import { InstallAppModal } from './components/InstallAppModal';
 import { MobileStickyCta } from './components/MobileStickyCta';
 import { Footer } from './components/Footer';
 import { CheckCircle2 } from 'lucide-react';
-
+import { subscribeToTripData, saveTripDataToCloud } from './firebase';
 const STORAGE_KEY = 'kayan_trip_sokhna_nov28_v6';
 
 export default function App() {
@@ -49,6 +49,19 @@ export default function App() {
     // 1. Attempt immediate autoplay
     audioPlayer.attemptAutoplay();
 
+
+    // الربط اللحظي مع السحابة لجلب أي تعديل فوراً
+  useEffect(() => {
+    const unsubscribe = subscribeToTripData((cloudData) => {
+      if (cloudData) {
+        setTripData(cloudData);
+      }
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
     // 2. Unblock audio on very first user interaction (click, touch, scroll) if browser restricts silent autoplay
     const handleFirstInteraction = () => {
       audioPlayer.play().catch(() => {});
@@ -288,6 +301,10 @@ export default function App() {
         onClose={() => setIsAdminModalOpen(false)}
         tripData={tripData}
         onSave={handleSaveTripData}
+         onSave={(newData) => {
+          setTripData(newData);
+          saveTripDataToCloud(newData).catch(() => {});
+          }}
         onResetToDefault={handleResetToDefault}
         isAdminLoggedIn={isAdminLoggedIn}
         setIsAdminLoggedIn={setIsAdminLoggedIn}
