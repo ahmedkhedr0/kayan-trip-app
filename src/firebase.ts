@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { TripData } from './types';
 import firebaseConfig from '../firebase-applet-config.json';
-import { initialTripData } from './data/initialData';
+import { INITIAL_TRIP_DATA as initialTripData } from './data/initialData';
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
