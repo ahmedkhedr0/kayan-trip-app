@@ -104,12 +104,12 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
 
         {/* Featured Official Banner Image - Sleek and proportional */}
-        <div className="rounded-2xl overflow-hidden border border-slate-700/60 bg-slate-900/80 shadow-xl mb-5 relative group">
-          <div className="relative aspect-[16/9] sm:aspect-[21/9] w-full overflow-hidden bg-slate-950">
+        <div className="rounded-2xl overflow-hidden border border-slate-700/60 bg-slate-950 shadow-xl mb-5 relative group">
+          <div className="relative w-full overflow-hidden bg-slate-950 flex items-center justify-center">
             <img
               src="/banner.jpg"
               alt="بانر رحلة كيان الرسمية"
-              className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.01]"
+              className="w-full h-auto max-h-[70vh] object-contain object-center transition-transform duration-500 group-hover:scale-[1.01]"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = bannerSrc;
               }}
