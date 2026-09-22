@@ -1,7 +1,7 @@
 export interface ScheduleItem {
   id: string;
   day: string; // e.g. "اليوم الأول"
-  time: string; // e.g. "06:00 ص"
+  time: string; // e.g. "07:30 ص"
   title: string;
   description: string;
   category: 'departure' | 'hotel' | 'activity' | 'food' | 'entertainment' | 'rest';
@@ -81,19 +81,19 @@ export interface TripInfo {
   companySlogan: string;
   tripTitle: string;
   destination: string;
-  destinationBadge?: string; // اسم الوجهة المختصر تحت اللوجو في الشريط العلوي (مثل "العين السخنة")
+  destinationBadge?: string; // اسم الوجهة المختصر تحت اللوجو في الشريط العلوي (مثل "AIN SOKHNA")
   countdownHeadline?: string; // الجملة التي تظهر أعلى العداد التنازلي
   customLogoUrl?: string; // مسار أو رابط الشعار
   tripStartDate: string; // e.g. "2026-09-25T06:00"
   tripEndDate: string;
-  departureTime: string; // "06:30 صباحاً"
+  departureTime: string; // "07:30 صباحاً"
   gatheringTime: string; // "05:45 صباحاً"
   gatheringLocation: string;
   gatheringMapsUrl: string;
   whatsappGroupUrl: string;
   whatsappSupportNumber: string;
-  tripPrice: string; // e.g. "1,850 ج.م"
-  depositAmount: string; // e.g. "500 ج.م"
+  tripPrice: string; // e.g. "1,300 ج.م"
+  depositAmount: string; // e.g. "800 ج.م"
   bannerHeadline: string;
   bannerSubheadline: string;
   customBannerImage?: string;

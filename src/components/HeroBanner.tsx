@@ -137,7 +137,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 
           {/* Subtitle - Pleasant readable size */}
           <p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed max-w-lg mx-auto">
-            {bannerSubheadline || `${destinationBadge || destination} — شمس وبحر وفوم وكالر فستيفال وتصوير درون سينمائي ولمة باص الضحكة فيها طالعة من القلب.`}
+            {bannerSubheadline || `${destinationBadge || destination} —  الضحكة فيها طالعة من القلب.`}
           </p>
 
           {/* 🏖️ COMPACT, CHEERFUL & EYE-FRIENDLY COUNTDOWN TIMER 🌊 */}

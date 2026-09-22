@@ -36,7 +36,7 @@ export const DepartureSection: React.FC<DepartureSectionProps> = ({
           </h2>
         </div>
         <p className="text-xs text-slate-300 max-w-sm leading-relaxed">
-          حضورك قبل الموعد بنصف ساعة يضمن استلام كارت الباص والبادج والوجبة بسلاسة تامة.
+          حضورك قبل الموعد بنصف ساعة يضمن استلام كارت الباص والبادج  بسلاسة تامة.
         </p>
       </div>
 
@@ -122,7 +122,7 @@ export const DepartureSection: React.FC<DepartureSectionProps> = ({
             </h3>
 
             <p className="text-xs text-slate-300 mb-3 leading-relaxed">
-              تنتظر باصات شركة كيان أمام مسجد الاستاد مباشرة، مع لافتات باسم الرحلة ومكتب استقبال مخصص.
+              تنتظر باصات شركة كيان أمام مسجد الاستاد مباشرة، مع لافتات باسم الرحلة و استقبال مخصص.
             </p>
 
             <div className="grid grid-cols-2 gap-2 text-[11px] mb-3">

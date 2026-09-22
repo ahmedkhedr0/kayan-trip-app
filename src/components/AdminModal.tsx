@@ -46,7 +46,13 @@ import { DEFAULT_GALLERY_ITEMS } from '../data/defaultGallery';
 import { audioPlayer } from '../utils/audioPlayer';
 import { parseVideoUrl } from '../utils/mediaUtils';
 import { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp, setDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { db, auth } from '../lib/firebase';
+
+// The PIN you type in the admin login screen becomes the PASSWORD for this fixed
+// account — create it once in Firebase Console → Authentication → Users → Add user,
+// using this exact email and whatever password/PIN you choose (6+ characters).
+const ADMIN_EMAIL = 'admin@kayan-trip.app';
 
 interface AdminModalProps {
   isOpen: boolean;
@@ -106,6 +112,15 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   React.useEffect(() => {
     setFormData(tripData);
   }, [tripData, isOpen]);
+
+  // Keep isAdminLoggedIn in sync with the REAL Firebase Auth session (persists across
+  // refresh, and can't be faked by just flipping a bit of client-side state)
+  React.useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAdminLoggedIn(!!user);
+    });
+    return () => unsubscribe();
+  }, [setIsAdminLoggedIn]);
 
   // Fetch online bookings when bookings tab is active
   useEffect(() => {
@@ -168,20 +183,29 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const handleLogin = (e?: React.FormEvent, overridePin?: string) => {
     if (e) e.preventDefault();
     const pinToTest = (overridePin ?? pinInput).trim();
-    if (pinToTest === '1234' || pinToTest === '2026' || pinToTest.toLowerCase() === 'admin') {
-      setIsAuthenticating(true);
-      setPinError('');
-      setAuthSuccessNotice(true);
-      setTimeout(() => {
-        setIsAdminLoggedIn(true);
-        setIsAuthenticating(false);
-        setAuthSuccessNotice(false);
-        setPinInput('');
-      }, 750);
-    } else {
-      setFailedAttempts((prev) => prev + 1);
-      setPinError('ACCESS DENIED // INVALID CLEARANCE CIPHER');
+    if (pinToTest.length < 6) {
+      setPinError('ACCESS DENIED // CODE TOO SHORT');
+      return;
     }
+
+    setIsAuthenticating(true);
+    setPinError('');
+
+    signInWithEmailAndPassword(auth, ADMIN_EMAIL, pinToTest)
+      .then(() => {
+        setAuthSuccessNotice(true);
+        setTimeout(() => {
+          // isAdminLoggedIn is set by the onAuthStateChanged listener above
+          setIsAuthenticating(false);
+          setAuthSuccessNotice(false);
+          setPinInput('');
+        }, 750);
+      })
+      .catch(() => {
+        setIsAuthenticating(false);
+        setFailedAttempts((prev) => prev + 1);
+        setPinError('ACCESS DENIED // INVALID CLEARANCE CIPHER');
+      });
   };
 
   const handleKeypadPress = (val: string) => {
@@ -192,29 +216,19 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     } else if (val === 'ENTER') {
       handleLogin();
     } else if (pinInput.length < 8) {
-      const nextPin = pinInput + val;
-      setPinInput(nextPin);
-      if (nextPin === '1234' || nextPin === '2026') {
-        handleLogin(undefined, nextPin);
-      }
+      setPinInput(pinInput + val);
     }
   };
 
   const handleSave = async () => {
     onSave(formData);
-    // Sync trip config to Firebase Firestore
+    // Sync the FULL trip config to Firebase Firestore so every visitor sees the same data,
+    // not just a handful of fields (this was the bug: only name/location/times/price were
+    // being synced, so schedule/gallery/FAQs/road stops/banner text etc. only ever updated
+    // the admin's own local browser state and never reached the shared database).
     try {
       await setDoc(doc(db, 'config', 'trip'), {
-        name: formData.tripTitle,
-        location: formData.destination,
-        departureISO: formData.tripStartDate,
-        departureLabel: formData.departureTime,
-        gatheringPoint: formData.gatheringLocation,
-        gatheringLabel: formData.gatheringTime,
-        price: formData.tripPrice,
-        deposit: formData.depositAmount,
-        urgentNotice: formData.urgentNotice || '',
-        showNotice: formData.showNotice,
+        ...formData,
         updatedAt: serverTimestamp()
       }, { merge: true });
     } catch (err) {
@@ -543,8 +557,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       tripTitle: 'رحلة جديدة 2027',
       destination: 'العين السخنة / دهب / الإسكندرية',
       tripStartDate: '2026-12-25T06:00:00',
-      gatheringTime: '06:00 صباحاً',
-      departureTime: '06:30 صباحاً',
+      gatheringTime: '07:00 صباحاً',
+      departureTime: '07:30 صباحاً',
       gatheringLocation: 'شارع الاستاد — أمام مسجد الاستاد',
       gatheringMapsUrl: 'https://maps.google.com',
       bannerHeadline: 'Official Trip | رحلة جديدة',
@@ -643,28 +657,24 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 maxLength={8}
                 value={pinInput}
                 onChange={(e) => {
-                  const val = e.target.value;
-                  setPinInput(val);
+                  setPinInput(e.target.value);
                   setPinError('');
-                  if (val === '1234' || val === '2026') {
-                    handleLogin(undefined, val);
-                  }
                 }}
                 autoFocus
                 className="absolute inset-0 opacity-0 w-full h-full cursor-default z-20"
                 aria-label="أدخل رمز المرور"
               />
 
-              {/* 4 Clean Elegant Password Slots */}
-              <div className="flex items-center justify-center gap-2.5 sm:gap-3 select-none" dir="ltr">
-                {[0, 1, 2, 3].map((slotIdx) => {
+              {/* 8 Clean Elegant Password Slots */}
+              <div className="flex items-center justify-center gap-2 sm:gap-2.5 select-none" dir="ltr">
+                {[0, 1, 2, 3, 4, 5, 6, 7].map((slotIdx) => {
                   const hasChar = pinInput.length > slotIdx;
                   const isActive = pinInput.length === slotIdx && !isAuthenticating;
 
                   return (
                     <div
                       key={slotIdx}
-                      className={`w-11 h-12 sm:w-12 sm:h-13 rounded-xl flex items-center justify-center font-mono text-lg font-bold transition-all relative ${
+                      className={`w-8 h-10 sm:w-9 sm:h-11 rounded-xl flex items-center justify-center font-mono text-base font-bold transition-all relative ${
                         hasChar
                           ? 'bg-cyan-950/50 border border-cyan-400/80 text-cyan-300 shadow-sm'
                           : isActive
@@ -789,7 +799,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                معرض الصور والفيديوهات ({formData.galleryItems?.length ?? DEFAULT_GALLERY_ITEMS.length}) 📸
+                معرض الصور ({formData.galleryItems?.length ?? DEFAULT_GALLERY_ITEMS.length}) 📸
               </button>
               <button
                 onClick={() => setActiveTab('schedule')}
@@ -1337,7 +1347,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 </div>
               )}
 
-              {/* Tab: Gallery & Video Management */}
+              {/* Tab: Gallery Management */}
               {activeTab === 'gallery' && (
                 <div className="space-y-6">
                   {/* Top Bar with Add and Reset Buttons */}
@@ -1345,13 +1355,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     <div>
                       <h4 className="text-sm font-bold text-white flex items-center gap-2">
                         <Camera className="w-4 h-4 text-cyan-400" />
-                        <span>إدارة معرض الأجواء والفيديوهات</span>
+                        <span>إدارة معرض الصور</span>
                         <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-cyan-950 text-cyan-300 border border-cyan-500/30">
                           {formData.galleryItems?.length ?? DEFAULT_GALLERY_ITEMS.length} عنصر
                         </span>
                       </h4>
                       <p className="text-xs text-slate-400 mt-1">
-                        يمكنك إضافة صور جديدة، أو مقاطع فيديو (رابط مباشر mp4 أو رابط يوتيوب)، وتعديل العناوين والتصنيفات، أو حذف أي صورة فوراً.
+                        يمكنك إضافة صور جديدة، وتعديل العناوين والتصنيفات، أو حذف أي صورة فوراً.
                       </p>
                     </div>
 
@@ -1363,15 +1373,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>إضافة صورة جديدة 📸</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleAddGalleryItem('video')}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-all shadow-md shadow-rose-600/20"
-                      >
-                        <Video className="w-3.5 h-3.5" />
-                        <span>إضافة فيديو جديد 🎬</span>
                       </button>
 
                       <button
@@ -1477,7 +1478,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                                     className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-750 text-white text-xs"
                                   >
                                     <option value="image">صورة (Image)</option>
-                                    <option value="video">فيديو (Video MP4 / YouTube)</option>
                                   </select>
                                 </div>
 
@@ -2311,7 +2311,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                 <button
                   type="button"
-                  onClick={() => setIsAdminLoggedIn(false)}
+                  onClick={() => signOut(auth)}
                   className="px-3 py-2 rounded-xl text-slate-400 hover:text-rose-400 text-xs font-medium transition-colors"
                 >
                   قفل لوحة الأدمن

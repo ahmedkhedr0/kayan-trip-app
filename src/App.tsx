@@ -18,7 +18,7 @@ import { MobileStickyCta } from './components/MobileStickyCta';
 import { Footer } from './components/Footer';
 import { CheckCircle2 } from 'lucide-react';
 
-const STORAGE_KEY = 'kayan_trip_nov28_v6';
+const STORAGE_KEY = 'kayan_trip_sokhna_nov28_v6';
 
 export default function App() {
   const [tripData, setTripData] = useState<TripInfo>(() => {

@@ -109,7 +109,7 @@ export const CountdownCard: React.FC<CountdownCardProps> = ({
             <div>
               <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400 mb-1">
                 <Clock className="w-3.5 h-3.5" />
-                <span>{countdownHeadline || 'العد التنازلي لانطلاق الفوج'}</span>
+                <span>{countdownHeadline || 'العد التنازلي لانطلاق الرحله'}</span>
               </div>
               <h2 className="text-lg sm:text-xl font-black text-white">
                 {timeLeft.isPast ? 'بدأت المغامرة الآن! 🎉' : 'الوقت المتبقي حتى ساعة التحرك'}
@@ -128,7 +128,7 @@ export const CountdownCard: React.FC<CountdownCardProps> = ({
           {timeLeft.isPast ? (
             <div className="py-8 text-center bg-emerald-500/10 border border-emerald-500/30 rounded-2xl">
               <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto mb-2" />
-              <h3 className="text-xl font-bold text-white mb-1">الفوج انطلق رسمياً!</h3>
+              <h3 className="text-xl font-bold text-white mb-1">الرحله انطلقت رسمياً!</h3>
               <p className="text-xs text-emerald-300">نتمنى لجميع طلاب كيان أمتع وأسعد الأوقات في هذه الرحلة.</p>
             </div>
           ) : (

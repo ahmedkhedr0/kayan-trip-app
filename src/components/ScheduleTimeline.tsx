@@ -18,8 +18,11 @@ export const ScheduleTimeline: React.FC<ScheduleTimelineProps> = ({
 }) => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'activity' | 'food' | 'departure'>('all');
 
+  // Hidden for now — will be re-enabled once the day's program is finalized
+  const scheduleReady = false;
+
   // If schedule is hidden or not determined yet
-  if (!showSchedule) {
+  if (!showSchedule || !scheduleReady) {
     return (
       <section id="schedule-section" className="py-8 sm:py-12 max-w-4xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="bg-[#0b172a]/90 border border-cyan-500/30 rounded-3xl p-6 sm:p-10 text-center shadow-2xl backdrop-blur-md relative overflow-hidden">
@@ -31,7 +34,7 @@ export const ScheduleTimeline: React.FC<ScheduleTimelineProps> = ({
             <span>جدول الفعاليات والأنشطة</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-white mb-2.5">
-            برنامج الرحلة قيد التجهيز والتنسيق ⏳
+            ستعرض قريباً ⏳
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 font-medium max-w-lg mx-auto mb-6 leading-relaxed">
             {scheduleUnannouncedText ||

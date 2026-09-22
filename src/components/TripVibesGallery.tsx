@@ -11,16 +11,12 @@ import {
   Users,
   Waves,
   Music,
-  Image as ImageIcon,
-  Play,
-  Video,
-  ExternalLink
+  Image as ImageIcon
 } from 'lucide-react';
 import { GalleryItem, GalleryItemCategory } from '../types';
 import { DEFAULT_GALLERY_ITEMS } from '../data/defaultGallery';
-import { parseVideoUrl } from '../utils/mediaUtils';
 
-export type GalleryFilterCategory = 'all' | GalleryItemCategory | 'video';
+export type GalleryFilterCategory = 'all' | GalleryItemCategory;
 
 interface TripVibesGalleryProps {
   items?: GalleryItem[];
@@ -37,7 +33,9 @@ export const TripVibesGallery: React.FC<TripVibesGalleryProps> = ({
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
 
-  const galleryList = items && items.length > 0 ? items : DEFAULT_GALLERY_ITEMS;
+  const galleryList = (items && items.length > 0 ? items : DEFAULT_GALLERY_ITEMS).filter(
+    (item) => item.type !== 'video'
+  );
 
   const handleToggleLike = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -49,13 +47,11 @@ export const TripVibesGallery: React.FC<TripVibesGalleryProps> = ({
 
   const filteredItems = galleryList.filter((item) => {
     if (activeCategory === 'all') return true;
-    if (activeCategory === 'video') return item.type === 'video';
     return item.category === activeCategory;
   });
 
   const categories: { key: GalleryFilterCategory; label: string; icon: React.FC<{ className?: string }> }[] = [
     { key: 'all', label: `الكل (${galleryList.length}) 🌟`, icon: Camera },
-    { key: 'video', label: 'فيديوهات حصرية 🎬', icon: Video },
     { key: 'funday', label: 'Fun Day وألوان 🎈', icon: Sparkles },
     { key: 'students', label: 'طلبة وذكريات 🎓', icon: Users },
     { key: 'buses', label: 'باصات السفر 🚌', icon: Bus },
@@ -72,13 +68,13 @@ export const TripVibesGallery: React.FC<TripVibesGalleryProps> = ({
       <div className="text-center max-w-2xl mx-auto mb-8">
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-950/80 border border-cyan-400/40 text-cyan-300 text-xs font-bold mb-2.5 shadow-sm">
           <Camera className="w-3.5 h-3.5 text-cyan-400" />
-          <span>OFFICIAL TRIP ALBUM & VIDEOS</span>
+          <span>OFFICIAL TRIP ALBUM</span>
         </div>
         <h2 className="text-2xl sm:text-3xl font-black text-white mb-2 tracking-tight">
-          معرض الأجواء والفيديوهات ولحظات الرحلة 📸🎬
+          معرض صور رحلات كيان السابقة 📸
         </h2>
         <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-          شاهد لقطات وفيديوهات الـ Fun Day، وتجمع الطلبة، والباصات السياحية، وشواطئ البحر، والستيدج والدي جي، وسينما الموفي نايت، وبانرات كيان الرسمية!
+          شاهد صور حقيقية من رحلات كيان السابقة: الـ Fun Day، وتجمع الطلبة، والباصات السياحية، وشواطئ البحر، والستيدج والدي جي!
         </p>
 
         {/* Categories Tab Selector */}
@@ -115,9 +111,7 @@ export const TripVibesGallery: React.FC<TripVibesGalleryProps> = ({
           {filteredItems.map((item) => {
             const isLiked = likedMap[item.id];
             const totalLikes = item.likes + (isLiked ? 1 : 0);
-            const isVideo = item.type === 'video';
-            const parsed = isVideo ? parseVideoUrl(item.url) : null;
-            const displayImage = item.thumbnail || (parsed?.thumbnail) || item.url;
+            const displayImage = item.thumbnail || item.url;
 
             return (
               <div
@@ -138,26 +132,11 @@ export const TripVibesGallery: React.FC<TripVibesGalleryProps> = ({
                     }}
                   />
 
-                  {/* Video Play Badge Center */}
-                  {isVideo && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="w-13 h-13 rounded-full bg-rose-600/95 text-white flex items-center justify-center shadow-xl shadow-rose-600/40 group-hover:scale-110 transition-transform">
-                        <Play className="w-6 h-6 fill-current translate-x-0.5" />
-                      </div>
-                    </div>
-                  )}
-                  
                   {/* Gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/25 to-transparent opacity-75 group-hover:opacity-85 transition-opacity" />
 
                   {/* Top Category Badge */}
                   <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
-                    {isVideo && (
-                      <span className="px-2 py-0.5 rounded-lg text-[10px] font-black bg-rose-600 text-white flex items-center gap-1 shadow-sm">
-                        <Video className="w-3 h-3" />
-                        <span>فيديو</span>
-                      </span>
-                    )}
                     <span className="px-2.5 py-1 rounded-lg text-[11px] font-black bg-slate-950/80 backdrop-blur-md text-cyan-300 border border-cyan-500/30 shadow-sm">
                       {item.badge}
                     </span>
@@ -184,7 +163,7 @@ export const TripVibesGallery: React.FC<TripVibesGalleryProps> = ({
                       <span>{totalLikes} إعجاب</span>
                     </div>
                     <span className="flex items-center gap-1 text-[11px] font-bold text-cyan-300 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span>{isVideo ? 'تشغيل الفيديو' : 'تكبير الصورة'}</span>
+                      <span>تكبير الصورة</span>
                       <Maximize2 className="w-3 h-3" />
                     </span>
                   </div>
@@ -215,10 +194,10 @@ export const TripVibesGallery: React.FC<TripVibesGalleryProps> = ({
           </div>
           <div>
             <span className="text-xs sm:text-sm font-bold text-white block">
-              تغطية تصوير وفيديو سينمائي متكاملة مجاناً لجميع الطلاب 📸🎬
+              تغطية تصوير فوتوغرافي متكاملة مجاناً لجميع الطلاب 📸
             </span>
             <span className="text-[11px] text-slate-400">
-              يتم رفع ألبومات صور وفيديوهات الـ Fun Day، والباصات، والشاطئ، والموفي نايت بجودة فائقة على جوجل درايف بعد الرحلة.
+              يتم رفع ألبومات صور الـ Fun Day، والباصات، والشاطئ بجودة فائقة على جوجل درايف بعد الرحلة.
             </span>
           </div>
         </div>
@@ -242,13 +221,13 @@ export const TripVibesGallery: React.FC<TripVibesGalleryProps> = ({
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black transition-all shrink-0 shadow-md shadow-emerald-500/20 active:scale-95"
             >
               <Send className="w-3.5 h-3.5" />
-              <span>جروب صور وفيديوهات الرحلة</span>
+              <span>جروب صور الرحلة</span>
             </a>
           )}
         </div>
       </div>
 
-      {/* Lightbox Modal (Supports Image & Video with Full Fallbacks) */}
+      {/* Lightbox Modal (photo view) */}
       {selectedItem && (
         <div
           onClick={() => setSelectedItem(null)}
@@ -270,56 +249,16 @@ export const TripVibesGallery: React.FC<TripVibesGalleryProps> = ({
 
             {/* Media Content */}
             <div className="max-h-[70vh] min-h-[320px] w-full overflow-hidden bg-black flex items-center justify-center relative">
-              {selectedItem.type === 'video' ? (
-                (() => {
-                  const media = parseVideoUrl(selectedItem.url);
-
-                  if (media.isEmbed && media.embedUrl) {
-                    return (
-                      <div className="w-full h-[55vh] max-h-[70vh] relative bg-black">
-                        <iframe
-                          src={media.embedUrl}
-                          title={selectedItem.title}
-                          className="w-full h-full border-0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          allowFullScreen
-                        />
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <video
-                      key={selectedItem.url}
-                      src={selectedItem.url}
-                      controls
-                      autoPlay
-                      playsInline
-                      className="max-h-[70vh] w-full object-contain bg-black"
-                    >
-                      <source src={selectedItem.url} type="video/mp4" />
-                      متصفحك لا يدعم تشغيل هذا الفيديو مباشرة.
-                    </video>
-                  );
-                })()
-              ) : (
-                <img
-                  src={selectedItem.url}
-                  alt={selectedItem.title}
-                  className="max-h-[70vh] w-full object-contain"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/banner_sokhna.jpg';
-                  }}
-                />
-              )}
+              <img
+                src={selectedItem.url}
+                alt={selectedItem.title}
+                className="max-h-[70vh] w-full object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/banner_sokhna.jpg';
+                }}
+              />
 
               <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5">
-                {selectedItem.type === 'video' && (
-                  <span className="px-2.5 py-1 rounded-lg text-xs font-black bg-rose-600 text-white flex items-center gap-1 shadow-md">
-                    <Video className="w-3.5 h-3.5" />
-                    <span>فيديو</span>
-                  </span>
-                )}
                 <span className="px-3 py-1.5 rounded-xl text-xs font-black bg-slate-950/90 text-cyan-300 border border-cyan-500/40 shadow-lg">
                   {selectedItem.badge}
                 </span>
@@ -338,18 +277,6 @@ export const TripVibesGallery: React.FC<TripVibesGalleryProps> = ({
               </div>
 
               <div className="flex items-center gap-3 shrink-0">
-                {selectedItem.type === 'video' && (
-                  <a
-                    href={selectedItem.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors"
-                  >
-                    <span>فتح المصدر</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                )}
-
                 <button
                   type="button"
                   onClick={() => handleToggleLike(selectedItem.id)}

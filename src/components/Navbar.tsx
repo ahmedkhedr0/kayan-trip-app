@@ -112,8 +112,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </div>
             <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-slate-400 truncate">
-              <span className="text-cyan-400 font-medium">
-                {destinationBadge && destinationBadge.trim() !== '' ? destinationBadge : (destination || 'العين السخنة')}
+              <span className="text-cyan-400 font-medium" dir="ltr">
+                AIN SOKHNA
               </span>
               <span className="text-slate-600 hidden xs:inline">•</span>
               <span className="text-slate-400 font-normal hidden xs:inline">الرحلة الرسمية</span>

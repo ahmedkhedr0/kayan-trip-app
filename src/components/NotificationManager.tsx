@@ -53,7 +53,7 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
     {
       id: 'u2',
       icon: '🌊',
-      title: 'تأكيد حجز شاطئ نادي الجوهرة بالسخنة',
+      title: 'تأكيد حجز شاطئ نادي  بالسخنة',
       desc: 'تم الانتهاء من تجهيز منطقة الشاطئ وحمامات السباحة ومدافع الفوم بارتي.',
       time: 'اليوم',
       isNew: false
