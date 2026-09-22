@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from './lib/firebase';
 import { TripInfo } from './types';
 import { INITIAL_TRIP_DATA } from './data/initialData';
 import { audioPlayer } from './utils/audioPlayer';
@@ -21,22 +23,59 @@ import { CheckCircle2 } from 'lucide-react';
 const STORAGE_KEY = 'kayan_trip_sokhna_nov28_v6';
 
 export default function App() {
-  const [tripData, setTripData] = useState<TripInfo>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return {
-          ...INITIAL_TRIP_DATA,
-          ...parsed,
-          galleryItems: parsed.galleryItems && parsed.galleryItems.length > 0 ? parsed.galleryItems : INITIAL_TRIP_DATA.galleryItems
-        };
+  const [tripData, setTripData] = useState<TripInfo>(INITIAL_TRIP_DATA);
+  const [isTripDataLoading, setIsTripDataLoading] = useState(true);
+
+  // Live sync with Firestore — every visitor (and every device) reads the SAME
+  // document, and onSnapshot pushes any admin change to everyone instantly,
+  // with no refresh needed. localStorage is kept only as an offline fallback.
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      doc(db, 'config', 'trip'),
+      (snap) => {
+        if (snap.exists()) {
+          const remote = snap.data() as Partial<TripInfo>;
+          const merged: TripInfo = {
+            ...INITIAL_TRIP_DATA,
+            ...remote,
+            galleryItems:
+              remote.galleryItems && remote.galleryItems.length > 0
+                ? remote.galleryItems
+                : INITIAL_TRIP_DATA.galleryItems
+          };
+          setTripData(merged);
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+          } catch {
+            // ignore
+          }
+        }
+        setIsTripDataLoading(false);
+      },
+      (err) => {
+        console.warn('Firestore trip config sync failed, falling back to local cache:', err);
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            setTripData({
+              ...INITIAL_TRIP_DATA,
+              ...parsed,
+              galleryItems:
+                parsed.galleryItems && parsed.galleryItems.length > 0
+                  ? parsed.galleryItems
+                  : INITIAL_TRIP_DATA.galleryItems
+            });
+          }
+        } catch {
+          // ignore
+        }
+        setIsTripDataLoading(false);
       }
-    } catch {
-      // ignore
-    }
-    return INITIAL_TRIP_DATA;
-  });
+    );
+
+    return () => unsubscribe();
+  }, []);
 
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
@@ -89,15 +128,23 @@ export default function App() {
     }
   };
 
-  const handleResetToDefault = () => {
+  const handleResetToDefault = async () => {
     if (window.confirm('هل أنت متأكد من استعادة كافة بيانات الرحلة الأصلية لشركة كيان؟')) {
+      setTripData(INITIAL_TRIP_DATA);
       try {
         localStorage.removeItem(STORAGE_KEY);
       } catch {
         // ignore
       }
-      setTripData(INITIAL_TRIP_DATA);
-      showToast('تمت استعادة البيانات الافتراضية لرحلة السخنة بنجاح.');
+      try {
+        await setDoc(doc(db, 'config', 'trip'), {
+          ...INITIAL_TRIP_DATA,
+          updatedAt: serverTimestamp()
+        });
+        showToast('تمت استعادة البيانات الافتراضية لرحلة السخنة بنجاح.');
+      } catch {
+        showToast('تعذّر مزامنة الاستعادة مع القاعدة المشتركة، حاول مرة أخرى.');
+      }
     }
   };
 
